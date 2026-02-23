@@ -14,7 +14,7 @@ These are practical, opinionated skills for disciplined software engineering —
 | `verification-before-completion` | `/bender:verification-before-completion` | Auto — before any "done", "fixed", or "tests pass" claim |
 | `test-driven-development` | `/bender:test-driven-development` | Auto — when implementing features or fixing bugs |
 | `brainstorming` | `/bender:brainstorming` | Auto — when starting new features or design decisions |
-| `code-review` | `/bender:code-review [file or ref]` | Manual — you invoke it when you want a fresh-eyes review |
+| `code-review` | `/bender:code-review` · `/bender:code-review branch` | Manual — no arg reviews uncommitted changes; `branch` reviews everything on the current branch vs. main |
 
 **Auto** skills load when Claude determines they're relevant. **Manual** skills only run when you invoke them directly — `code-review` runs in a fresh subagent context so it has no bias from the implementing session.
 
