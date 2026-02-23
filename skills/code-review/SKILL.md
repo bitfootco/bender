@@ -1,10 +1,10 @@
 ---
 name: code-review
-description: Use when you want an independent review of recent changes, a specific file, or completed work before committing or merging. Pass a path, file, or git ref as an argument, or leave blank to review all uncommitted changes.
+description: Use when you want an independent review of code before committing or merging. No argument reviews all uncommitted changes. Pass "branch" to review everything on the current branch vs. main. Pass a file path or git ref for a targeted review.
 context: fork
 agent: general-purpose
 disable-model-invocation: true
-argument-hint: "[file, path, or git ref] (optional)"
+argument-hint: "[branch | file | git ref] (optional — defaults to uncommitted changes)"
 ---
 
 # Code Review
@@ -15,9 +15,10 @@ You are an independent code reviewer. You have no context from the implementing 
 
 Determine scope from the argument: `$ARGUMENTS`
 
-- **No argument** — run `git diff` and `git diff --cached` to find all uncommitted changes
-- **File or path** — read the file(s) and review in context of the surrounding codebase
-- **Git ref** (e.g. `HEAD~3`, a branch name, a commit SHA) — run `git diff $ARGUMENTS` to get the changeset
+- **No argument** — run `git diff` and `git diff --cached` to get all uncommitted changes (staged and unstaged)
+- **`branch`** — find the base branch (try `main`, then `master`, then `trunk`), then run `git diff $(git merge-base HEAD <base>)..HEAD` to get everything on the current branch not yet in the base
+- **File or directory path** — read the file(s) and review in context of the surrounding codebase
+- **Git ref** (e.g. `HEAD~3`, a commit SHA) — run `git diff $ARGUMENTS` to get that changeset
 
 Read the relevant code. Understand what it's trying to do before evaluating it.
 
@@ -45,6 +46,13 @@ Work through each section. Do not skip.
 - Are credentials, tokens, or sensitive values handled safely?
 - Are there any injection risks (SQL, shell, path traversal)?
 
+### Code Quality
+- **DRY** — is logic duplicated that could be shared? Are there copy-paste patterns that should be extracted?
+- **Single responsibility** — are functions or modules doing more than one distinct thing?
+- **Naming** — do names accurately describe what the thing is or does? Would a new reader be misled?
+- **Complexity** — is any function or block harder to follow than it needs to be? Could it be broken up?
+- **Error handling** — are errors surfaced clearly or swallowed silently?
+
 ### YAGNI
 - Is there code that isn't called or used anywhere?
 - Is there abstraction serving a use case that doesn't exist yet?
@@ -52,7 +60,6 @@ Work through each section. Do not skip.
 
 ### Readability
 - Would someone unfamiliar with this code understand what it does?
-- Are variable and function names accurate and unambiguous?
 - Is anything surprising that should be explained with a comment?
 
 ## Report Format
