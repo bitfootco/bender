@@ -1,10 +1,10 @@
 ---
-name: milestone-implementation
+name: milestone
 description: Use at the start of a session when there is a roadmap or milestone document and you want to pick up the next item. Orients from a cold start, locates the roadmap, identifies the next unfinished item, and proceeds to implementation.
 argument-hint: "[roadmap file path] (optional — auto-discovers ROADMAP.md, MILESTONES.md, docs/*.md if not specified)"
 ---
 
-# Milestone Implementation
+# Milestone
 
 ## Core Rule
 
@@ -66,7 +66,8 @@ Do not guess what to work on from conversation context alone. Always read the ro
 
 - Follow standard bender engineering practices: TDD, verification before completion claims, systematic debugging if anything breaks.
 - Do not implement adjacent features, refactor nearby code, or add "while I'm in here" improvements. If something obviously needs fixing outside the milestone scope, note it as a candidate for a future roadmap item — do not act on it now.
-- After implementation is complete and verified, proceed to Phase 5 before touching the roadmap.
+- When implementation is functionally complete and CI / spec checks are passing, run `/bender:code-review` before proceeding. Resolve any **must fix** findings before moving on.
+- After implementation is complete, verified, and reviewed, proceed to Phase 5 before touching the roadmap.
 
 ---
 

@@ -15,9 +15,10 @@ These are practical, opinionated skills for disciplined software engineering —
 | `test-driven-development` | `/bender:test-driven-development` | Auto — when implementing features or fixing bugs |
 | `brainstorming` | `/bender:brainstorming` | Auto — when starting new features or design decisions |
 | `code-review` | `/bender:code-review` · `/bender:code-review branch` | Manual — no arg reviews uncommitted changes; `branch` reviews everything on the current branch vs. main |
-| `milestone-implementation` | `/bender:milestone-implementation` · `/bender:milestone-implementation path/to/ROADMAP.md` | Manual — cold-start session skill: finds your roadmap, identifies the next incomplete item, scopes it, and implements it |
+| `milestone` | `/bender:milestone` · `/bender:milestone path/to/ROADMAP.md` | Manual — cold-start session skill: finds your roadmap, identifies the next incomplete item, scopes it, and implements it |
+| `roadmap` | `/bender:roadmap` · `/bender:roadmap "goal description"` | Manual — breaks a large feature or initiative into sequenced, single-session milestones and writes them to `ROADMAP.md` |
 
-**Auto** skills load when Claude determines they're relevant. **Manual** skills only run when you invoke them directly — `code-review` runs in a fresh subagent context so it has no bias from the implementing session. `milestone-implementation` is the entry point for roadmap-driven sessions.
+**Auto** skills load when Claude determines they're relevant. **Manual** skills only run when you invoke them directly — `code-review` runs in a fresh subagent context so it has no bias from the implementing session. Use `roadmap` to plan, then `milestone` to execute session by session.
 
 ---
 

@@ -59,6 +59,8 @@ Once an approach is approved, write a brief summary:
 
 Then ask whether to proceed directly to implementation or plan it out first.
 
+If the approved approach has multiple distinct phases or will span several sessions, note those phases explicitly — they're good candidates for a `ROADMAP.md`. Suggest using `/bender:roadmap` to capture them before implementing.
+
 ## Rules
 
 - One question per message during clarification — do not ask multiple questions at once
