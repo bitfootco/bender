@@ -1,29 +1,41 @@
 # bender
 
-A personal Claude Code plugin with skills for disciplined software engineering.
+AI coding conventions and workflow skills for Claude Code, built and used by [The Bitfoot Company](https://github.com/bitfootco).
+
+These are practical, opinionated skills for disciplined software engineering — the stuff that keeps code quality high and debugging sessions short. Install them once, use them across every project.
+
+---
 
 ## Skills
 
-| Skill | Invocation | Purpose |
+| Skill | Invocation | When it activates |
 |---|---|---|
-| `systematic-debugging` | `/bender:systematic-debugging` | Four-phase root cause debugging before any fix attempt |
+| `systematic-debugging` | `/bender:systematic-debugging` | Auto — whenever Claude encounters a bug or test failure |
+| `verification-before-completion` | `/bender:verification-before-completion` | Auto — before any "done", "fixed", or "tests pass" claim |
+| `test-driven-development` | `/bender:test-driven-development` | Auto — when implementing features or fixing bugs |
+| `brainstorming` | `/bender:brainstorming` | Auto — when starting new features or design decisions |
+| `code-review` | `/bender:code-review [file or ref]` | Manual — you invoke it when you want a fresh-eyes review |
 
-More coming: `verification-before-completion`, `test-driven-development`, `code-review`, `brainstorming`.
+**Auto** skills load when Claude determines they're relevant. **Manual** skills only run when you invoke them directly — `code-review` runs in a fresh subagent context so it has no bias from the implementing session.
+
+---
 
 ## Installation
 
-**Add the marketplace and install the plugin:**
+From within any Claude Code session:
 
 ```shell
 /plugin marketplace add bitfootco/bender
 /plugin install bender@bender
 ```
 
-Skills are namespaced under `bender:`, so invoke them as `/bender:skill-name`.
+Skills are namespaced under `bender:` to avoid conflicts with other plugins.
+
+---
 
 ## Team setup
 
-To prompt teammates to install when they open a project, add to `.claude/settings.json`:
+To have teammates automatically prompted to install when they trust a project folder, add to `.claude/settings.json` in your repo:
 
 ```json
 {
@@ -41,12 +53,26 @@ To prompt teammates to install when they open a project, add to `.claude/setting
 }
 ```
 
+---
+
 ## Local development
 
-To test skills live from this repo without installing:
+To test changes live without installing:
 
 ```shell
 claude --plugin-dir .
 ```
 
-Skills reload on restart. Make a change, restart Claude Code, test with `/bender:skill-name`.
+Skills reload on restart. Make a change, restart, test with `/bender:skill-name`.
+
+---
+
+## Philosophy
+
+These skills encode the engineering principles The Bitfoot Company works by:
+
+- **Root cause over symptom** — never fix what you don't understand
+- **Evidence over assertion** — never claim something works without showing it
+- **Design before code** — never build before you know what you're building
+- **Test first** — the test suite is the specification
+- **Fresh eyes on review** — the person who wrote the code is the worst person to review it
