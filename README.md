@@ -16,6 +16,7 @@ These are practical, opinionated skills for disciplined software engineering —
 | `brainstorming` | `/bender:brainstorming` | Auto — when starting new features or design decisions |
 | `code-review` | `/bender:code-review` · `/bender:code-review branch` | Manual — no arg reviews uncommitted changes; `branch` reviews everything on the current branch vs. main |
 | `milestone` | `/bender:milestone` · `/bender:milestone path/to/ROADMAP.md` | Manual — cold-start session skill: finds your roadmap, identifies the next incomplete item, scopes it, and implements it |
+| `pr` | `/bender:pr` · `/bender:pr develop` | Manual — generates a high-level PR description from the current branch, copies it to the clipboard |
 | `roadmap` | `/bender:roadmap` · `/bender:roadmap "goal description"` | Manual — breaks a large feature or initiative into sequenced, single-session milestones and writes them to `ROADMAP.md` |
 
 **Auto** skills load when Claude determines they're relevant. **Manual** skills only run when you invoke them directly — `code-review` runs in a fresh subagent context so it has no bias from the implementing session. Use `roadmap` to plan, then `milestone` to execute session by session.
