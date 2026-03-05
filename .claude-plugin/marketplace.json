@@ -11,7 +11,7 @@
       "name": "bender",
       "source": "./",
       "description": "Development workflow skills for debugging, TDD, code review, and disciplined engineering",
-      "version": "0.2.1",
+      "version": "0.3.2",
       "author": {
         "name": "bitfootco"
       }

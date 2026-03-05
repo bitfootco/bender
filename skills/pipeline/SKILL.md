@@ -1,7 +1,7 @@
 ---
 name: pipeline
 description: Orchestrates the full roadmap-to-committed-code flow. Iterates through milestones — implementing, testing, reviewing, and committing each — with human approval gates.
-argument-hint: "[roadmap file path] (optional — auto-discovers ROADMAP.md, MILESTONES.md, docs/*.md if not specified)"
+argument-hint: "[--auto] [roadmap file path] (optional — --auto skips human review gate per milestone; roadmap auto-discovers if not specified)"
 ---
 
 # Pipeline
@@ -10,13 +10,15 @@ argument-hint: "[roadmap file path] (optional — auto-discovers ROADMAP.md, MIL
 
 **ROADMAP IN, COMMITTED CODE OUT. EVERY MILESTONE PASSES CI AND REVIEW BEFORE COMMITTING.**
 
-Do not skip steps, do not reorder phases, do not commit without human approval.
+Do not skip steps, do not reorder phases, do not commit without human approval — unless `--auto` mode is active.
 
 ---
 
 ## Phase 1: Orient
 
-1. **Locate the roadmap.** If `$ARGUMENTS` is provided, read that file. Otherwise auto-discover in this order:
+1. **Parse mode flag.** If `$ARGUMENTS` contains `--auto`, enable auto mode (skip Phase 4 human review gate). Strip the flag before interpreting the rest as a file path.
+
+2. **Locate the roadmap.** If `$ARGUMENTS` provides a file path, read that file. Otherwise auto-discover in this order:
    - `ROADMAP.md`
    - `MILESTONES.md`
    - `docs/ROADMAP.md`
@@ -25,13 +27,13 @@ Do not skip steps, do not reorder phases, do not commit without human approval.
 
    If no roadmap is found after checking all locations, **stop immediately**. Tell the user no roadmap was found and suggest running `/bender:roadmap` first.
 
-2. **Read recent git history.** Run `git log --oneline -15` to understand what has been completed recently.
+3. **Read recent git history.** Run `git log --oneline -15` to understand what has been completed recently.
 
-3. **Check for work in progress.** Run `git status` to detect uncommitted changes or in-progress work.
+4. **Check for work in progress.** Run `git status` to detect uncommitted changes or in-progress work.
 
-4. **Check project conventions.** Read `CLAUDE.md` if it exists, then `README.md`, to understand project patterns, constraints, and file maintenance protocols.
+5. **Check project conventions.** Read `CLAUDE.md` if it exists, then `README.md`, to understand project patterns, constraints, and file maintenance protocols.
 
-5. **Discover CI command.** Use this fallback chain (stop at first match):
+6. **Discover CI command.** Use this fallback chain (stop at first match):
    1. `bin/ci` exists → use it
    2. `CLAUDE.md` specifies a CI/test command → use it
    3. Auto-discover from project files:
@@ -43,7 +45,7 @@ Do not skip steps, do not reorder phases, do not commit without human approval.
       - `pyproject.toml` or `setup.py` → `pytest`
    4. If nothing found → **stop**. Tell the user no CI command was discovered and ask them to specify one.
 
-6. **Parse dependency graph.** Scan milestones for IDs (`M<n>:` prefix) and `{depends: ...}` markers:
+7. **Parse dependency graph.** Scan milestones for IDs (`M<n>:` prefix) and `{depends: ...}` markers:
    - If IDs and dependency markers are present → build a directed graph
    - If IDs are present but no `{depends:}` markers → milestones without markers are independent
    - If no IDs anywhere → assume sequential (each depends on the previous)
@@ -97,7 +99,9 @@ Execute the discovered CI command.
 
 ## Phase 4: Human Review Gate
 
-This is the **only pause point** in the pipeline. Present a summary:
+**If `--auto` mode is active:** skip this phase entirely. Log the summary below to the conversation for traceability, then proceed directly to Phase 5.
+
+**Otherwise**, this is the **only pause point** in the pipeline. Present a summary:
 
 - Milestone item (verbatim from roadmap)
 - What was implemented (concise list)
@@ -145,7 +149,7 @@ Wait for user response:
 
 - Never skip CI — every milestone passes before code review.
 - Never skip code review — every milestone is reviewed before human approval.
-- Never commit without human approval (Phase 4 gate is mandatory).
+- Never commit without human approval (Phase 4 gate is mandatory) — unless `--auto` mode is active, in which case CI + code review must still pass.
 - Never mark done without fidelity check.
 - Auto-fix loop capped at 3 attempts → escalate.
 - Human review rounds capped at 3 per milestone.
