@@ -45,6 +45,7 @@ Break the goal into a sequenced list of milestones:
 - **Be concrete** — a milestone name should make it obvious what gets built, not just what area it touches. Prefer "Add JWT authentication to the API" over "Authentication work".
 - **Apply YAGNI** — do not add milestones for hypothetical future needs. Plan to the stated goal, not beyond it.
 - **Don't re-plan completed work** — items already in git history should not appear as `- [ ]` items.
+- **If milestones have dependency relationships** (some can run in parallel), assign milestone IDs (`M1:`, `M2:`) and add `{depends: M1}` markers so `pipeline` can parallelize independent work.
 
 Aim for 3–8 milestones. If the breakdown exceeds 8 items, the goal is probably too large for one roadmap — propose splitting into phases.
 
@@ -82,9 +83,28 @@ Write the file using this format:
 - [ ] Milestone three description
 ```
 
+When milestones have parallel potential, use milestone IDs and `{depends:}` markers:
+
+```markdown
+# Roadmap
+
+## [Goal or Phase Name]
+
+- [ ] M1: Set up project scaffolding
+- [ ] M2: Add database schema {depends: M1}
+- [ ] M3: Implement API endpoints {depends: M2}
+- [ ] M4: Add auth middleware {depends: M2}
+- [ ] M5: Integration tests {depends: M3, M4}
+- [ ] M6: Add CI config
+```
+
+If all milestones are strictly sequential, IDs and dependency markers are optional.
+
 Use `- [ ]` for every planned item. Use `- [x]` only for items already completed. Do not use any other done-marker — `milestone` parses this format.
 
 After writing, confirm the file path and tell the user they can run `/bender:milestone` to start executing.
+
+If no `bin/ci` script or CI command was found in `CLAUDE.md` during Phase 1, suggest the user add one. Example: "Consider adding your CI/test command to `CLAUDE.md` (e.g., `Run tests: npm test`) so milestone and pipeline can discover it automatically."
 
 ---
 
@@ -96,3 +116,4 @@ After writing, confirm the file path and tell the user they can run `/bender:mil
 - Use `- [ ]` format — this is what `milestone` parses.
 - Do not silently overwrite an existing roadmap. Always ask first.
 - YAGNI: plan to the goal, not beyond it.
+- When milestones have parallel potential, use milestone IDs and `{depends:}` markers.

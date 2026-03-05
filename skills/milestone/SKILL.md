@@ -31,6 +31,8 @@ Do not guess what to work on from conversation context alone. Always read the ro
 
 4. **Check project conventions.** Read `CLAUDE.md` if it exists, then `README.md`, to understand project patterns and constraints.
 
+5. **Discover CI command.** Check in order: `bin/ci` → CI/test command in `CLAUDE.md` → auto-discover from project files (`package.json` scripts.test, `Makefile` ci/test target, `Cargo.toml` → `cargo test`, `Gemfile` → `bundle exec rspec`, `go.mod` → `go test ./...`, `pyproject.toml`/`setup.py` → `pytest`). If found, note it for Phase 4. If not found, skip CI steps (don't block — milestone predates CI requirement).
+
 ---
 
 ## Phase 2: Identify the next item
@@ -66,6 +68,7 @@ Do not guess what to work on from conversation context alone. Always read the ro
 
 - Follow standard bender engineering practices: TDD, verification before completion claims, systematic debugging if anything breaks.
 - Do not implement adjacent features, refactor nearby code, or add "while I'm in here" improvements. If something obviously needs fixing outside the milestone scope, note it as a candidate for a future roadmap item — do not act on it now.
+- If a CI command was discovered in Phase 1, run it after implementation is functionally complete. If CI fails, debug using systematic-debugging before proceeding to code review. Do not proceed to code review until CI passes.
 - When implementation is functionally complete and CI / spec checks are passing, run `/bender:code-review` before proceeding. Resolve any **must fix** findings before moving on.
 - After implementation is complete, verified, and reviewed, proceed to Phase 5 before touching the roadmap.
 
@@ -80,6 +83,12 @@ Before declaring the work complete or updating the roadmap:
 3. Confirm the two match. If implementation went narrower than described, note what remains. If it went broader, flag the delta explicitly.
 4. Only once the match is confirmed, mark the item done in the roadmap — check the box, strike the item, or follow whatever convention the doc uses.
 5. **Do not rewrite or reorder the roadmap doc.** Only mark the completed item. Never restructure, re-prioritize, or editorialize the document.
+
+---
+
+## Phase 6: Doc sync
+
+If `CLAUDE.md` defines a file maintenance protocol (e.g., files that must be updated when certain areas change), follow it. If no protocol exists, only update the roadmap checkbox. All doc changes should be included when staging the commit.
 
 ---
 

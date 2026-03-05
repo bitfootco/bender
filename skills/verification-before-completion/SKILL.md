@@ -43,6 +43,7 @@ These phrases signal you are about to make an unverified claim. Run the verifica
 | "Build succeeds" | Run the build, show successful completion |
 | "No lint errors" | Run the linter, show clean output |
 | "Feature works" | Exercise it against the actual requirement, show the result |
+| "All tests pass" | Run the project's full CI or test suite command (not a single file), show output and exit code |
 
 ## What Does Not Count
 
@@ -53,3 +54,11 @@ These phrases signal you are about to make an unverified claim. Run the verifica
 - Partial output that shows only selected lines
 
 Each claim requires its own fresh verification run.
+
+## CI / Full Suite Verification
+
+When the claim involves overall project health ("tests pass", "everything works", "ready to commit"), verification must include the project's CI or full test suite — not just the tests you wrote or modified this session.
+
+Discover the CI command via: `bin/ci` → `CLAUDE.md` → auto-discover from project files (`package.json`, `Makefile`, `Cargo.toml`, etc.). If no CI command is found, run the broadest test command available.
+
+Running a single test file that passes does not verify that other tests weren't broken.
