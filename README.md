@@ -19,6 +19,7 @@ These are practical, opinionated skills for disciplined software engineering —
 | `pr` | `/bender:pr` · `/bender:pr develop` | Manual — generates a high-level PR description from the current branch, copies it to the clipboard |
 | `pipeline` | `/bender:pipeline` · `/bender:pipeline path/to/ROADMAP.md` | Manual — drives every milestone in a roadmap through implementation, CI, code review, and commit |
 | `roadmap` | `/bender:roadmap` · `/bender:roadmap "goal description"` | Manual — breaks a large feature or initiative into sequenced, single-session milestones and writes them to `ROADMAP.md` |
+| `summary` | `/bender:summary` | Manual — summarizes the most recent commit or pending changes: what shipped, why it matters, and how it fits into the existing code |
 
 **Auto** skills load when Claude determines they're relevant. **Manual** skills only run when you invoke them directly — `code-review` runs in a fresh subagent context so it has no bias from the implementing session. Use `roadmap` to plan, then `milestone` to execute session by session, or `pipeline` to execute the entire roadmap in one session with automated CI and review loops.
 
