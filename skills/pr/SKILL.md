@@ -1,7 +1,6 @@
 ---
 name: pr
-description: Generate a GitHub pull request description from the current branch. Produces a high-level, markdown-formatted summary and copies it to the clipboard. Pass a base branch if it's not main/master.
-argument-hint: "[base branch] (optional — defaults to main or master)"
+description: Generate a high-level, markdown-formatted GitHub pull request description from the current branch and return it as Markdown in chat. Use when the user asks for a PR description; use a base branch from the request when supplied, otherwise discover main, master, or trunk.
 ---
 
 # Pull Request Description
@@ -16,11 +15,11 @@ The output is a markdown PR description ready to paste into GitHub. It should te
 
 ## Phase 1: Gather context
 
-1. Identify the base branch. If `$ARGUMENTS` names one, use it. Otherwise try `main`, then `master`, then `trunk`. Confirm it exists before proceeding.
+1. Identify the base branch. If the user names one, use it. Otherwise try `main`, then `master`, then `trunk`. Confirm it exists before proceeding.
 2. Run `git log --oneline $(git merge-base HEAD <base>)..HEAD` to get the commit history for this branch.
 3. Run `git diff $(git merge-base HEAD <base>)..HEAD --stat` to get the file-level change summary.
 4. Run `git diff $(git merge-base HEAD <base>)..HEAD` to read the actual changes.
-5. Read any relevant context files (`README.md`, `CLAUDE.md`, `ROADMAP.md`) if they help explain the purpose of the work.
+5. Read any relevant context files (`README.md`, `AGENTS.md`, `CLAUDE.md`, `ROADMAP.md`) if they help explain the purpose of the work.
 
 Understand the full scope before writing anything.
 
@@ -59,14 +58,10 @@ Anything a reviewer should know: areas of risk, design tradeoffs, things you'd l
 
 ---
 
-## Phase 3: Copy to clipboard
+## Phase 3: Return in chat
 
-After writing the description, copy the raw markdown to the system clipboard:
-
-- **macOS:** pipe to `pbcopy`
-- **Linux:** pipe to `xclip -selection clipboard` or `xsel --clipboard --input`
-
-Tell the user the description has been copied and is ready to paste into GitHub.
+Return the PR description as Markdown directly in chat. Do not copy it to the
+system clipboard or invoke clipboard tools.
 
 ---
 
@@ -76,5 +71,4 @@ Tell the user the description has been copied and is ready to paste into GitHub.
 - Do not pad with filler. If the PR is simple, the description should be short.
 - Do not include a PR title — GitHub has a separate field for that. Output only the body.
 - Do not fabricate changes. Every bullet must trace back to something in the diff.
-- Always copy to clipboard. If the clipboard command fails, print the raw markdown as a fenced code block so the user can copy manually.
 - Do not ask the user any questions. Gather everything you need from git and the codebase.

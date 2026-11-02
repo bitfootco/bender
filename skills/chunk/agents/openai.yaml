@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chunk"
+  short_description: "Implement one kernel with minimal code"
+  default_prompt: "Use $chunk to isolate, compare, and implement one small, simplicity-first slice of a request, plan, or existing change."

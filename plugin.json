@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "bender",
+  "version": "0.4.0",
+  "description": "Disciplined software engineering workflows for planning, implementation, debugging, review, and delivery",
+  "author": {
+    "name": "The Bitfoot Company",
+    "url": "https://github.com/bitfootco"
+  },
+  "homepage": "https://github.com/bitfootco/bender",
+  "repository": "https://github.com/bitfootco/bender.git",
+  "license": "MIT",
+  "keywords": ["skills", "debugging", "tdd", "code-review", "workflows", "engineering"]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Inchstone"
+  short_description: "Execute one milestone as surgical chunks"
+  default_prompt: "Use $inchstone to execute one roadmap parent through sequential, simplicity-first chunks."

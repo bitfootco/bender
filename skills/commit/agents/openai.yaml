@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commit Message"
+  short_description: "Draft one conventional commit message"
+  default_prompt: "Use $commit to draft a one-line conventional commit message for my current changes."

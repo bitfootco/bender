@@ -30,7 +30,7 @@ If none of these produce output (brand-new repo with no commits), say so and sto
 1. Get the file-level summary: `git diff --stat HEAD` (or `git show --stat HEAD` if falling back to the commit)
 2. Read the full diff — every line of it
 3. For each file that changed substantially, read the surrounding code in that file: the functions, classes, or modules adjacent to the changed lines. Don't read only the diff lines — understand what the changed code lives inside and connects to.
-4. If there's a `README.md`, `CLAUDE.md`, or `ROADMAP.md` at the project root and the change seems architectural, skim it for context on the project's structure and intent.
+4. If there's a `README.md`, `AGENTS.md`, `CLAUDE.md`, or `ROADMAP.md` at the project root and the change seems architectural, skim it for context on the project's structure and intent.
 
 Goal: understand not just *what changed* but *what role those changes play* in the larger codebase.
 

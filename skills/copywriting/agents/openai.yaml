@@ -1,0 +1,4 @@
+interface:
+  display_name: "Copywriting"
+  short_description: "Write concise copy within brand constraints"
+  default_prompt: "Use $copywriting to improve this copy while following the applicable BRAND.md."

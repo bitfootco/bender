@@ -1,0 +1,4 @@
+interface:
+  display_name: "Change Summary"
+  short_description: "Explain what the current change ships"
+  default_prompt: "Use $summary to explain my current changes and how they fit."

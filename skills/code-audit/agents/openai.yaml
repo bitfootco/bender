@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Audit"
+  short_description: "Audit a codebase for evidenced risks"
+  default_prompt: "Use $code-audit to audit this repository and rank the confirmed findings."

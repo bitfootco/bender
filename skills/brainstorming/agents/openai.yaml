@@ -1,0 +1,4 @@
+interface:
+  display_name: "Brainstorming"
+  short_description: "Design features before implementation begins"
+  default_prompt: "Use $brainstorming to explore and choose an approach for this feature."

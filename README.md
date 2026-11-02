@@ -1,46 +1,56 @@
 # bender
 
-AI coding conventions and workflow skills for Claude Code, built and used by [The Bitfoot Company](https://github.com/bitfootco).
+Portable AI coding workflows for Codex and Claude Code, built and used by [The Bitfoot Company](https://github.com/bitfootco).
 
-These are practical, opinionated skills for disciplined software engineering — the stuff that keeps code quality high and debugging sessions short. Install them once, use them across every project.
-
----
+Bender packages practical, opinionated skills for planning, implementation, debugging, review, and delivery. The same `skills/` directory is distributed through the portable Agent Plugins manifest and Claude Code marketplace metadata, so both hosts execute the same workflows.
 
 ## Skills
 
-| Skill | Invocation | When it activates |
-|---|---|---|
-| `systematic-debugging` | `/bender:systematic-debugging` | Auto — whenever Claude encounters a bug or test failure |
-| `verification-before-completion` | `/bender:verification-before-completion` | Auto — before any "done", "fixed", or "tests pass" claim |
-| `test-driven-development` | `/bender:test-driven-development` | Auto — when implementing features or fixing bugs |
-| `brainstorming` | `/bender:brainstorming` | Auto — when starting new features or design decisions |
-| `code-review` | `/bender:code-review` · `/bender:code-review branch` | Manual — no arg reviews uncommitted changes; `branch` reviews everything on the current branch vs. main |
-| `milestone` | `/bender:milestone` · `/bender:milestone path/to/ROADMAP.md` | Manual — cold-start session skill: finds your roadmap, identifies the next incomplete item, scopes it, and implements it |
-| `pr` | `/bender:pr` · `/bender:pr develop` | Manual — generates a high-level PR description from the current branch, copies it to the clipboard |
-| `pipeline` | `/bender:pipeline` · `/bender:pipeline path/to/ROADMAP.md` | Manual — drives every milestone in a roadmap through implementation, CI, code review, and commit |
-| `roadmap` | `/bender:roadmap` · `/bender:roadmap "goal description"` | Manual — breaks a large feature or initiative into sequenced, single-session milestones and writes them to `ROADMAP.md` |
-| `summary` | `/bender:summary` | Manual — summarizes the most recent commit or pending changes: what shipped, why it matters, and how it fits into the existing code |
+| Skill | Codex | Claude Code | Purpose |
+|---|---|---|---|
+| `brainstorming` | `$brainstorming` | `/bender:brainstorming` | Explore and approve a design before implementation |
+| `chunk` | `$chunk` | `/bender:chunk` | Isolate and implement one coherent kernel of code |
+| `code-audit` | `$code-audit` | `/bender:code-audit` | Audit a repository or subsystem for evidenced risks |
+| `code-review` | `$code-review` | `/bender:code-review` | Review a diff, branch, commit, path, or pending changes |
+| `commit` | `$commit` | `/bender:commit` | Draft one Conventional Commit subject |
+| `copywriting` | `$copywriting` | `/bender:copywriting` | Create concise copy within brand constraints |
+| `inchstone` | `$inchstone` | `/bender:inchstone` | Execute one roadmap parent as surgical behavior slices |
+| `milestone` | `$milestone` | `/bender:milestone` | Implement the next roadmap parent directly |
+| `pipeline` | `$pipeline` | `/bender:pipeline` | Run a complete roadmap through implementation and review |
+| `pr` | `$pr` | `/bender:pr` | Draft a high-level pull request description |
+| `roadmap` | `$roadmap` | `/bender:roadmap` | Break an initiative into executable milestones |
+| `summary` | `$summary` | `/bender:summary` | Explain what the current change ships |
+| `systematic-debugging` | `$systematic-debugging` | `/bender:systematic-debugging` | Find root causes before applying fixes |
+| `test-driven-development` | `$test-driven-development` | `/bender:test-driven-development` | Implement changes with red-green-refactor |
+| `verification-before-completion` | `$verification-before-completion` | `/bender:verification-before-completion` | Require fresh evidence before completion claims |
 
-**Auto** skills load when Claude determines they're relevant. **Manual** skills only run when you invoke them directly — `code-review` runs in a fresh subagent context so it has no bias from the implementing session. Use `roadmap` to plan, then `milestone` to execute session by session, or `pipeline` to execute the entire roadmap in one session with automated CI and review loops.
+Skills can also activate implicitly when a request matches their description. Explicit invocation is useful when you want a particular workflow or mode.
 
----
+## Install for Codex
 
-## Installation
-
-From within any Claude Code session:
+Add the GitHub repository as a marketplace, then install Bender:
 
 ```shell
+codex plugin marketplace add bitfootco/bender
+codex plugin add bender@bender
+```
+
+Use `/skills` in Codex to inspect the installed skills, or mention one with `$skill-name`.
+
+## Install for Claude Code
+
+From a Claude Code session:
+
+```text
 /plugin marketplace add bitfootco/bender
 /plugin install bender@bender
 ```
 
-Skills are namespaced under `bender:` to avoid conflicts with other plugins.
+Skills are namespaced under `bender:` to avoid conflicts with other Claude Code plugins.
 
----
+### Claude Code team setup
 
-## Team setup
-
-To have teammates automatically prompted to install when they trust a project folder, add to `.claude/settings.json` in your repo:
+To prompt teammates to install Bender when they trust a project folder, add this to `.claude/settings.json`:
 
 ```json
 {
@@ -58,26 +68,46 @@ To have teammates automatically prompted to install when they trust a project fo
 }
 ```
 
----
-
 ## Local development
 
-To test changes live without installing:
+Codex can load the current checkout as a local marketplace:
+
+```shell
+codex plugin marketplace add .
+codex plugin add bender@bender
+```
+
+Claude Code can load the checkout directly:
 
 ```shell
 claude --plugin-dir .
 ```
 
-Skills reload on restart. Make a change, restart, test with `/bender:skill-name`.
+Validate the cross-host package contract before publishing:
 
----
+```shell
+python3 -m unittest discover -s tests -v
+```
+
+Restart the host after changing installed plugin files if it does not detect the update automatically.
+
+## Package layout
+
+```text
+plugin.json                    Portable Agent Plugins manifest
+.claude-plugin/                Claude Code marketplace metadata
+skills/<name>/SKILL.md         Shared workflow instructions
+skills/<name>/agents/          Codex presentation metadata
+skills/<name>/references/      Supporting material loaded when required
+tests/                         Cross-host packaging contract
+```
+
+The root `skills/` directory is the single source of truth. Host-specific copies are intentionally not maintained.
 
 ## Philosophy
 
-These skills encode the engineering principles The Bitfoot Company works by:
-
-- **Root cause over symptom** — never fix what you don't understand
+- **Root cause over symptom** — never fix what you do not understand
 - **Evidence over assertion** — never claim something works without showing it
-- **Design before code** — never build before you know what you're building
+- **Design before code** — never build before you know what you are building
 - **Test first** — the test suite is the specification
-- **Fresh eyes on review** — the person who wrote the code is the worst person to review it
+- **Fresh eyes on review** — review the evidence, not the implementation-session narrative

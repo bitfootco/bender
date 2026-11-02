@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pipeline"
+  short_description: "Run a roadmap via verified inchstones"
+  default_prompt: "Use $pipeline to execute every remaining roadmap parent through delegated inchstones."

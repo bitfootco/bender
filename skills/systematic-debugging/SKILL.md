@@ -20,7 +20,7 @@ Before touching any code:
 1. **Read the full error** — full stack traces, line numbers, error codes. Don't skim past the first line.
 2. **Reproduce it reliably** — if you can't reproduce it consistently, you don't understand it yet. Find the minimal reproduction case.
 3. **Scope the blast radius** — what changed recently? (`git log --oneline -20`) What are the exact conditions that trigger it vs. conditions where it does not occur?
-4. **Trace the data flow** — follow the failing value or execution path from entry point to failure point. Use `Grep`, `Read`, and `Glob` to trace through the actual code — do not reconstruct from memory.
+4. **Trace the data flow** — follow the failing value or execution path from entry point to failure point. Use the available file-search and reading tools (prefer `rg --files` and `rg`) to trace through the actual code — do not reconstruct from memory.
 
 ### Phase 2: Find the Pattern
 

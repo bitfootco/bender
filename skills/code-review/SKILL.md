@@ -1,24 +1,22 @@
 ---
 name: code-review
-description: Use when you want an independent review of code before committing or merging. No argument reviews all uncommitted changes. Pass "branch" to review everything on the current branch vs. main. Pass a file path or git ref for a targeted review.
-context: fork
-agent: general-purpose
-disable-model-invocation: true
-argument-hint: "[branch | file | git ref] (optional — defaults to uncommitted changes)"
+description: Independently review code before committing or merging. Use for a diff, branch, commit, path, or pending changes; route whole-repository or subsystem audits to code-audit.
 ---
 
 # Code Review
 
-You are an independent code reviewer. You have no context from the implementing session — you are seeing this code with fresh eyes. That is the point.
+Act as an independent code reviewer. Prefer a fresh subagent context when the user explicitly requests independent or delegated review and subagent tools are available. Otherwise, review from the current context while relying on the diff and repository evidence rather than implementation-session assumptions.
+
+Use `$code-audit` for an open-ended assessment of a repository or subsystem. Keep requests focused on a changeset, commit, or specified files in `$code-review`.
 
 ## What to Review
 
-Determine scope from the argument: `$ARGUMENTS`
+Determine scope from the user's request:
 
 - **No argument** — run `git diff` and `git diff --cached` to get all uncommitted changes (staged and unstaged)
 - **`branch`** — find the base branch (try `main`, then `master`, then `trunk`), then run `git diff $(git merge-base HEAD <base>)..HEAD` to get everything on the current branch not yet in the base
 - **File or directory path** — read the file(s) and review in context of the surrounding codebase
-- **Git ref** (e.g. `HEAD~3`, a commit SHA) — run `git diff $ARGUMENTS` to get that changeset
+- **Git ref** (e.g. `HEAD~3`, a commit SHA) — run `git diff <ref>` to get that changeset
 
 Read the relevant code. Understand what it's trying to do before evaluating it.
 

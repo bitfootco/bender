@@ -1,0 +1,4 @@
+interface:
+  display_name: "Milestone"
+  short_description: "Implement the next roadmap item directly"
+  default_prompt: "Use $milestone to pick up and directly implement the next roadmap item."

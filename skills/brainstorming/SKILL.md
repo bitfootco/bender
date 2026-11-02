@@ -27,7 +27,7 @@ Cap at 3 questions. If you need more, the scope is likely too large to design in
 
 Before proposing anything, look at the codebase:
 
-- Find related files with `Glob` and `Grep`
+- Find related files with the available search tools (prefer `rg --files` and `rg`)
 - Understand existing patterns and conventions
 - Identify what can be reused vs. what needs to be built
 
@@ -59,7 +59,7 @@ Once an approach is approved, write a brief summary:
 
 Then ask whether to proceed directly to implementation or plan it out first.
 
-If the approved approach has multiple distinct phases or will span several sessions, note those phases explicitly — they're good candidates for a `ROADMAP.md`. Suggest using `/bender:roadmap` to capture them before implementing.
+If the approved approach has multiple distinct phases or will span several sessions, note those phases explicitly — they're good candidates for a `ROADMAP.md`. Suggest using `$roadmap` to capture them before implementing.
 
 ## Rules
 

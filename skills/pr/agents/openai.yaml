@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pull Request Description"
+  short_description: "Draft a concise PR description from git"
+  default_prompt: "Use $pr to write a pull request description for this branch."

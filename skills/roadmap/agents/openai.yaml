@@ -1,0 +1,4 @@
+interface:
+  display_name: "Roadmap"
+  short_description: "Plan work as sequenced, scoped milestones"
+  default_prompt: "Use $roadmap to turn this initiative into executable milestones."

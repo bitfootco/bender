@@ -1,162 +1,122 @@
 ---
 name: pipeline
-description: Orchestrates the full roadmap-to-committed-code flow. Iterates through milestones — implementing, testing, reviewing, and committing each — with human approval gates.
-argument-hint: "[--auto] [roadmap file path] (optional — --auto skips human review gate per milestone; roadmap auto-discovers if not specified)"
+description: Orchestrate a full roadmap-to-committed-code flow by delegating each parent to inchstone, independently inspecting verified changes, reviewing once per parent, and committing completed parents. Use when the user asks to run a whole roadmap or pipeline. Accept `--auto` to skip the parent review gate and `--parallel` for isolated independent worktrees.
 ---
 
 # Pipeline
 
 ## Core Rule
 
-**ROADMAP IN, COMMITTED CODE OUT. EVERY MILESTONE PASSES CI AND REVIEW BEFORE COMMITTING.**
+**ROADMAP IN, COMMITTED CODE OUT. EACH PARENT GETS INCHSTONE-QUALITY EXECUTION, VERIFIED OWNERSHIP, REVIEW, AND A COMMIT.**
 
-Do not skip steps, do not reorder phases, do not commit without human approval — unless `--auto` mode is active.
+Pipeline owns parent selection, dependency order, attribution baselines, review gates, commits, roadmap markers, worktree integration, and the final summary. Delegate implementation and whole-parent technical verification to `inchstone`.
 
----
+## Modes
+
+- Default: execute ready parents sequentially and pause once for human review per parent.
+- `--auto`: skip only the parent review gate. Continue to stop for material ambiguity, blockers, unsafe attribution, requirement conflicts, or failed verification.
+- `--parallel`: execute only explicitly independent ready parents in isolated worktrees. Never infer parallel safety from convenience. Combine with `--auto` only when both flags are explicit.
+
+Strip recognized flags before interpreting a roadmap path.
 
 ## Phase 1: Orient
 
-1. **Parse mode flag.** If `$ARGUMENTS` contains `--auto`, enable auto mode (skip Phase 4 human review gate). Strip the flag before interpreting the rest as a file path.
+1. Locate the supplied roadmap or check `ROADMAP.md`, `MILESTONES.md`, `docs/ROADMAP.md`, `docs/MILESTONES.md`, then `.github/ROADMAP.md`. Stop if none exists.
+2. Read `git log --oneline -15`, `git status`, applicable `AGENTS.md` and `CLAUDE.md`, and relevant README sections.
+3. Read the complete `inchstone` and `code-review` skills.
+4. Discover CI from `bin/ci`, repository instructions, or project manifests. Stop and request a command if none can be determined.
+5. Parse IDs, dependency markers, ordering, and completed items. Without IDs, treat parents as sequential. With IDs but no dependency markers, treat them as independent only when the roadmap explicitly says so.
+6. Record outside the repository the initial `HEAD`, status including untracked files, full unstaged diff, and full staged diff. Treat all recorded work as user-owned.
 
-2. **Locate the roadmap.** If `$ARGUMENTS` provides a file path, read that file. Otherwise auto-discover in this order:
-   - `ROADMAP.md`
-   - `MILESTONES.md`
-   - `docs/ROADMAP.md`
-   - `docs/MILESTONES.md`
-   - `.github/ROADMAP.md`
+## Phase 2: Select Parent Work
 
-   If no roadmap is found after checking all locations, **stop immediately**. Tell the user no roadmap was found and suggest running `/bender:roadmap` first.
+Find incomplete parents whose dependencies are satisfied. Sequential mode selects the first ready parent. Do not ask whether to parallelize; parallel execution occurs only with explicit `--parallel`.
 
-3. **Read recent git history.** Run `git log --oneline -15` to understand what has been completed recently.
+For `--parallel`, select only ready parents whose implementation code, data, migrations, generated artifacts, parent-branch documentation, and acceptance criteria are demonstrably independent. Centralized roadmap markers do not disqualify otherwise independent parents. If implementation independence is uncertain, run sequentially. Limit concurrent workers to available agent capacity and at most three parent worktrees; batch the rest.
 
-4. **Check for work in progress.** Run `git status` to detect uncommitted changes or in-progress work.
+Quote each selected parent verbatim and extract acceptance criteria, dependencies, exclusions, and repository constraints.
 
-5. **Check project conventions.** Read `CLAUDE.md` if it exists, then `README.md`, to understand project patterns, constraints, and file maintenance protocols.
+## Phase 3: Establish Isolation and Delegated Contract
 
-6. **Discover CI command.** Use this fallback chain (stop at first match):
-   1. `bin/ci` exists → use it
-   2. `CLAUDE.md` specifies a CI/test command → use it
-   3. Auto-discover from project files:
-      - `package.json` with `scripts.test` → `npm test` (or `yarn test`/`pnpm test`/`bun test` based on lockfile)
-      - `Makefile` with `ci` or `test` target → `make ci` or `make test`
-      - `Cargo.toml` → `cargo test`
-      - `Gemfile` → `bundle exec rspec`
-      - `go.mod` → `go test ./...`
-      - `pyproject.toml` or `setup.py` → `pytest`
-   4. If nothing found → **stop**. Tell the user no CI command was discovered and ask them to specify one.
+Immediately before each delegation, capture a parent baseline containing `HEAD`, short status, full staged and unstaged diffs, and untracked paths. Stop if the parent needs a user-owned path or hunk.
 
-7. **Parse dependency graph.** Scan milestones for IDs (`M<n>:` prefix) and `{depends: ...}` markers:
-   - If IDs and dependency markers are present → build a directed graph
-   - If IDs are present but no `{depends:}` markers → milestones without markers are independent
-   - If no IDs anywhere → assume sequential (each depends on the previous)
-   - Completed `[x]` items satisfy dependencies
+In sequential mode, delegate in the current worktree. In parallel mode:
 
----
+1. Create a dedicated branch `pipeline/<parent-id>` and isolated worktree from the same verified base.
+2. Never copy uncommitted user work into a parent worktree.
+3. Give each worktree its own temporary attribution workspace.
+4. Do not allow workers to merge, commit, mark roadmap items, or clean up worktrees.
+5. Give concurrent workers isolated databases, ports, caches, containers, and external test namespaces where the project supports them. Otherwise serialize full CI; focused tests may overlap only when their runtime state is isolated.
 
-## Phase 2: Select Milestone(s)
+Pass inchstone exactly:
 
-1. **Parse the roadmap** for incomplete `- [ ]` items.
+- repository worktree and roadmap paths;
+- selected parent text verbatim and explicit acceptance criteria;
+- dependencies, exclusions, repository constraints, CI command, and verified existing behavior;
+- the parent attribution baseline and any pipeline-accepted patch manifest;
+- delegated mode with automatic acceptance only for uniquely dominant kernels and approaches;
+- an instruction to return every material ambiguity, requirement conflict, cross-chunk redesign, dirty-worktree overlap, blocker, unsafe attribution, or failed verification;
+- ownership rules reserving commits, markers, dependency sequencing, integration, and the parent review gate to pipeline.
 
-2. **Evaluate the dependency graph** to find milestones whose dependencies are all satisfied.
+## Phase 4: Inspect Delegated Results
 
-3. **If 2+ milestones are independent and ready**, ask the user one question: run them in parallel worktrees or sequentially?
-   - **Sequential:** pick the first ready milestone
-   - **Parallel:** launch each in its own worktree branch (`pipeline/<milestone-id>`). Max 3 parallel worktrees at once; batch the rest.
+When inchstone returns, independently verify rather than trusting its report:
 
-4. **If only one milestone is ready**, select it and proceed.
+1. Compare the worktree with the parent and pipeline baselines.
+2. Reconstruct the returned patch from its persisted hunk manifest and confirm it excludes all pre-existing and between-chunk user edits.
+3. Confirm every accepted kernel and approach met the clear-dominance standard. If any recommendation concealed a meaningful tradeoff, stop and present it to the user.
+4. Map every acceptance criterion to code and tests; trace unchanged callers and integration boundaries.
+5. Inspect fresh focused-test, full-CI, slimming, and whole-parent review evidence.
+6. Apply `code-review` independently to the exact parent-attributable patch. Route must-fix or behavior-changing findings back through delegated inchstone; do not edit implementation directly.
+7. Re-run full CI after remediation. Stop on failed verification or uncertain ownership.
 
----
+## Phase 5: Parent Review Gate
 
-## Phase 3: Implement (per-milestone loop)
+Present the only routine approval stop for the parent:
 
-### 3a — Scope and plan
+- parent item verbatim;
+- completed kernels and automatically accepted choices;
+- criterion-to-evidence map;
+- CI command and result;
+- inchstone and pipeline review verdicts;
+- attributable `git diff --stat`;
+- excluded user-owned changes and remaining findings.
 
-Identify affected files, apply the narrow interpretation rule, write a 3–5 line summary (what, approach, files, out-of-scope). No pause for approval — pipeline trusts roadmap specificity.
+Wait for approval or requested changes. Route requested implementation changes through delegated inchstone, reinspect, and present the gate again. Cap at three review rounds, then stop and discuss.
 
-### 3b — Implement with TDD
+Ambiguity and safety decisions are exceptional mandatory stops, not additional routine review gates, and do not consume the parent review gate.
 
-Follow standard bender practices: TDD, verification before completion claims, systematic debugging if anything breaks. No scope creep — each milestone implements exactly what the roadmap says.
+With `--auto`, log the same package and skip this gate only. Never skip ambiguity, safety, attribution, fidelity, review, or verification stops.
 
-### 3c — Run CI
+## Phase 6: Fidelity, Commit, and Marker
 
-Execute the discovered CI command.
+1. Re-read the parent verbatim and confirm the accepted patch exactly satisfies it. Stop on a narrower or broader result.
+2. Capture a fresh status and full staged/unstaged diff immediately before staging. Compare it with the accepted manifest and prior baseline; classify every newly arrived hunk as user-owned and stop on overlap or uncertain attribution.
+3. Stage only parent-attributable implementation changes. Never stage user-owned work.
+4. In sequential mode, mark only the selected roadmap parent complete, follow required documentation protocols, validate the docs diff, and create one Conventional Commit containing implementation and marker/docs.
+5. In parallel mode, commit only the verified implementation on its isolated branch. Do not edit roadmap markers there; marker ownership remains central for Phase 7.
+6. Do not push unless requested. Record the commit hash, verification evidence, and deferred observations.
 
-- If CI fails: debug and retry using systematic-debugging practices.
-- Cap at **3 consecutive CI failure → fix attempts**. If CI still fails after 3 attempts → **escalate to human**. Present the failures clearly and ask for guidance.
+## Phase 7: Parallel Integration and Continuation
 
-### 3d — Code review + auto-fix loop
+For `--parallel`, only integrate parent branches whose delegated work, independent inspection, review gate (unless `--auto`), fidelity check, CI, and implementation commit all succeeded.
 
-1. Run `/bender:code-review`
-2. If **must-fix** findings:
-   - Fix them
-   - Re-run CI
-   - Re-review
-   - Max **3 loop iterations**. If must-fix findings persist after 3 iterations → escalate to human.
-3. **Should-fix** findings: attempt once. Include any remaining in the human summary.
-4. **Consider** findings: note in human summary, don't act on them.
+Create a dedicated clean integration worktree from the verified target base. Immediately before each merge, capture its `HEAD`, status, and staged/unstaged diff; require it to contain only previously accepted pipeline integrations. Merge verified parent branches there in dependency-safe order. Stop for user resolution on conflicts; do not auto-resolve.
 
----
+After each merge, compare the integrated tree with its baseline and the accepted parent manifest. Run full CI. If CI fails, stop with the batch unaccepted, preserve the recoverable integration branch and evidence, and isolate the failing interaction before advancing; never mark parents or continue selection through a failed batch.
 
-## Phase 4: Human Review Gate
+After successful integration CI, centrally mark each integrated parent complete in dependency-safe order, follow documentation protocols, validate the marker/docs diff, and commit those centralized roadmap updates. Attribute that centralized commit to every parent it marks. Re-run full CI when repository protocol requires it.
 
-**If `--auto` mode is active:** skip this phase entirely. Log the summary below to the conversation for traceability, then proceed directly to Phase 5.
+Before updating the original target branch, verify its `HEAD`, status, and staged/unstaged diff still match the recorded target baseline. If it moved, became dirty, or overlaps the integration, stop. Otherwise fast-forward it to the verified integration branch, or merge the integration branch explicitly when a fast-forward is impossible, then confirm the target resolves to the verified integrated tree. Keep failed or ambiguous branches isolated. Remove worktrees and branches only after this handoff succeeds and cleanup is safe.
 
-**Otherwise**, this is the **only pause point** in the pipeline. Present a summary:
-
-- Milestone item (verbatim from roadmap)
-- What was implemented (concise list)
-- CI status (pass/fail, command used)
-- Code review verdict (pass, or remaining findings by severity)
-- `git diff --stat` output
-- Auto-fix iteration count (how many review→fix loops ran)
-
-Wait for user response:
-- **Approve** → proceed to Phase 5
-- **Request changes** → apply changes, re-run CI + code review, re-present summary. Max **3 human review rounds** per milestone. If still not approved → stop and discuss.
-
----
-
-## Phase 5: Commit and Doc Sync
-
-1. **Fidelity check.** Re-read the milestone item verbatim from the roadmap. List what was implemented. Confirm the two match. If they don't → flag the delta to the user before committing.
-
-2. **Commit.** Stage all changes and create a single conventional commit: `type(scope): description`. Do not push unless the user asks.
-
-3. **Mark done.** Update the roadmap: change `- [ ]` to `- [x]` for the completed milestone.
-
-4. **Doc sync.** Read `CLAUDE.md` for any file maintenance protocol. Update referenced docs as needed. If no protocol is found, only update the roadmap checkbox. All doc changes go in the same commit (amend the previous commit).
-
----
-
-## Phase 6: Next Milestone
-
-1. **Return to Phase 2** to select the next ready milestone.
-
-2. **If parallel worktrees were used:**
-   - Merge completed branches back (`--no-ff`)
-   - If merge conflicts arise → present them to the user for resolution
-   - Run CI on the merged result
-   - Clean up worktree branches
-
-3. **When all milestones are complete:** present a final summary:
-   - Total milestones completed
-   - Commits made (list with hashes)
-   - Any deferred notes (should-fix/consider findings, out-of-scope observations)
-
----
+Return to parent selection until the roadmap has no ready incomplete work. Finish with completed parents, commit hashes, integrated parallel batches, verification commands, and deferred findings or blockers.
 
 ## Hard Rules
 
-- Never skip CI — every milestone passes before code review.
-- Never skip code review — every milestone is reviewed before human approval.
-- Never commit without human approval (Phase 4 gate is mandatory) — unless `--auto` mode is active, in which case CI + code review must still pass.
-- Never mark done without fidelity check.
-- Auto-fix loop capped at 3 attempts → escalate.
-- Human review rounds capped at 3 per milestone.
-- CI failures after 3 fix attempts → escalate.
-- No scope creep — each milestone implements exactly what the roadmap says.
-- Don't rewrite or reorder the roadmap — only mark items done.
-- No roadmap found → stop immediately.
-- Sequential milestones complete in order; only explicitly independent milestones may parallelize.
-- Conventional commits only: `type(scope): description`.
-- Max 3 parallel worktrees at once; batch if more are independent.
+- Delegate every parent implementation to `inchstone`; pipeline never implements fixes directly.
+- Sequential is the default. Parallel work requires explicit `--parallel`, proven independence, and isolated worktrees.
+- Exactly one routine human gate occurs per parent; `--auto` skips only that gate.
+- Material ambiguity always reaches the user, including under `--auto`.
+- Pipeline alone owns commits, roadmap markers, dependency sequencing, worktree integration, and final reporting.
+- Never commit, mark done, merge, or clean up when ownership, fidelity, review, or verification is uncertain.
+- Never include pre-existing or between-chunk user edits in an accepted patch or commit.

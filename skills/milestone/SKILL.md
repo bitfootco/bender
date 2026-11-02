@@ -1,7 +1,6 @@
 ---
 name: milestone
-description: Use at the start of a session when there is a roadmap or milestone document and you want to pick up the next item. Orients from a cold start, locates the roadmap, identifies the next unfinished item, and proceeds to implementation.
-argument-hint: "[roadmap file path] (optional — auto-discovers ROADMAP.md, MILESTONES.md, docs/*.md if not specified)"
+description: Pick up and implement the next item from a roadmap or milestone document. Use at the start of a session when the user asks to continue a roadmap, execute the next milestone, or supplies a roadmap path. Implement one parent directly; use inchstone instead when the user explicitly asks for surgical chunking.
 ---
 
 # Milestone
@@ -12,92 +11,57 @@ argument-hint: "[roadmap file path] (optional — auto-discovers ROADMAP.md, MIL
 
 Do not guess what to work on from conversation context alone. Always read the roadmap document and the recent project state first. Do not begin implementation until Phases 1–3 are complete.
 
----
-
 ## Phase 1: Orient (cold start)
 
-1. **Locate the roadmap.** If `$ARGUMENTS` is provided, read that file. Otherwise auto-discover in this order:
-   - `ROADMAP.md`
-   - `MILESTONES.md`
-   - `docs/ROADMAP.md`
-   - `docs/MILESTONES.md`
-   - `.github/ROADMAP.md`
+1. Locate the roadmap. Use a user-supplied path; otherwise check `ROADMAP.md`, `MILESTONES.md`, `docs/ROADMAP.md`, `docs/MILESTONES.md`, then `.github/ROADMAP.md`. If none exists, stop; do not invent work.
+2. Run `git log --oneline -15` and `git status`. Preserve unrelated user work and stop before touching an overlapping path or hunk.
+3. Read applicable `AGENTS.md` and `CLAUDE.md`, then only the README sections needed for the item.
+4. Discover CI in this order: `bin/ci`; repository instructions; project manifests or build files. If none exists, use the broadest available test command and report the limitation.
 
-   If no roadmap is found after checking all locations, **stop immediately**. Tell the user no roadmap was found and suggest creating one. Do not invent a backlog or guess at what to work on.
+## Phase 2: Identify the Next Item
 
-2. **Read recent git history.** Run `git log --oneline -15` to understand what has been completed recently.
+1. Parse incomplete roadmap items and their dependencies or ordering.
+2. Select the first clearly ready item and state the selection. If multiple items are equally ready, present at most three and ask one focused question.
+3. Quote the selected parent verbatim and identify its acceptance criteria, dependencies, and exclusions.
+4. If the item is too vague to determine observable completion, ask one focused question before continuing.
 
-3. **Check for work in progress.** Run `git status` to detect uncommitted changes or in-progress work.
+## Phase 3: Scope and Plan
 
-4. **Check project conventions.** Read `CLAUDE.md` if it exists, then `README.md`, to understand project patterns and constraints.
+1. Trace relevant entry points, callers, tests, data flow, and repository conventions. Identify behavior already satisfied and behavior still required.
+2. Apply the narrow interpretation rule. Prefer extending existing paths over adding concepts.
+3. Present a concise implementation summary: intended outcome, direct approach, likely affected behavior or files, acceptance criteria, and explicit exclusions.
+4. Proceed unless the user corrects the boundary. Do not introduce chunk selection or approach approval gates.
 
-5. **Discover CI command.** Check in order: `bin/ci` → CI/test command in `CLAUDE.md` → auto-discover from project files (`package.json` scripts.test, `Makefile` ci/test target, `Cargo.toml` → `cargo test`, `Gemfile` → `bundle exec rspec`, `go.mod` → `go test ./...`, `pyproject.toml`/`setup.py` → `pytest`). If found, note it for Phase 4. If not found, skip CI steps (don't block — milestone predates CI requirement).
+## Phase 4: Implement Directly
 
----
+1. Implement the selected parent in the current context rather than delegating it through `chunk`.
+2. Use test-driven development: add the smallest failing behavior test, confirm the failure, implement the minimum change, and refactor while green.
+3. Do not implement adjacent features or unrelated cleanup. Preserve pre-existing work.
+4. If a test fails unexpectedly, use systematic debugging before changing more code.
+5. Run focused tests, then the discovered full CI command.
+6. Apply the `code-review` skill to the milestone-attributable diff. Resolve must-fix findings, rerun affected tests and CI, and re-review as needed.
 
-## Phase 2: Identify the next item
+## Phase 5: Milestone Fidelity Check
 
-1. **Parse the roadmap** for incomplete items — unchecked `- [ ]` boxes, un-struck items, items not marked done.
+Before declaring completion or editing the roadmap:
 
-2. **Select the next item:**
-   - If one item is clearly next (sequentially first incomplete, or marked with priority), select it automatically and state the selection.
-   - If multiple items are ambiguous (parallel tracks, unclear priority), present at most 3 candidates and ask the user to pick one. **One question only.**
+1. Re-read the parent item verbatim.
+2. Map every acceptance criterion to code and tests.
+3. Confirm the implementation matches the parent. If it is narrower or broader, report the delta and do not mark it complete.
+4. Confirm final CI and review succeeded with fresh evidence.
+5. Only then mark the selected item done using the roadmap's existing convention.
+6. Do not rewrite, reorder, annotate, or reprioritize other roadmap content.
 
-3. **Do not start Phase 3 until the item is confirmed** — either explicitly by the user or implicitly because there is only one clear candidate.
+## Phase 6: Doc Sync
 
----
-
-## Phase 3: Scope and plan
-
-1. **Identify affected files.** Use `Glob` and `Grep` to find files most likely touched by this milestone item. Note existing patterns and utilities to reuse — never ignore what's already there.
-
-2. **Apply the narrow interpretation rule.** If the milestone item could be read broadly or narrowly, take the narrower reading.
-
-3. **Write a 3–5 line implementation summary:**
-   - What we are building (one sentence)
-   - The approach (one sentence)
-   - Files we expect to touch
-   - What we are explicitly **not** building this session
-   - State the interpretation explicitly if there was any ambiguity
-
-4. **Present the summary.** If the user confirms (or does not object), proceed to Phase 4. No further approval ceremony needed.
-
----
-
-## Phase 4: Implement
-
-- Follow standard bender engineering practices: TDD, verification before completion claims, systematic debugging if anything breaks.
-- Do not implement adjacent features, refactor nearby code, or add "while I'm in here" improvements. If something obviously needs fixing outside the milestone scope, note it as a candidate for a future roadmap item — do not act on it now.
-- If a CI command was discovered in Phase 1, run it after implementation is functionally complete. If CI fails, debug using systematic-debugging before proceeding to code review. Do not proceed to code review until CI passes.
-- When implementation is functionally complete and CI / spec checks are passing, run `/bender:code-review` before proceeding. Resolve any **must fix** findings before moving on.
-- After implementation is complete, verified, and reviewed, proceed to Phase 5 before touching the roadmap.
-
----
-
-## Phase 5: Milestone fidelity check (before marking done)
-
-Before declaring the work complete or updating the roadmap:
-
-1. Re-read the milestone item verbatim from the roadmap document.
-2. List what was implemented.
-3. Confirm the two match. If implementation went narrower than described, note what remains. If it went broader, flag the delta explicitly.
-4. Only once the match is confirmed, mark the item done in the roadmap — check the box, strike the item, or follow whatever convention the doc uses.
-5. **Do not rewrite or reorder the roadmap doc.** Only mark the completed item. Never restructure, re-prioritize, or editorialize the document.
-
----
-
-## Phase 6: Doc sync
-
-If `CLAUDE.md` defines a file maintenance protocol (e.g., files that must be updated when certain areas change), follow it. If no protocol exists, only update the roadmap checkbox. All doc changes should be included when staging the commit.
-
----
+Follow any documentation maintenance protocol in `AGENTS.md` or `CLAUDE.md`; otherwise update only the parent marker. Validate the docs-only diff with the configured validator or `git diff --check`.
 
 ## Hard Rules
 
-- Never start Phase 4 without completing Phases 1–3.
-- If no roadmap file is found, stop immediately — do not invent a backlog.
-- Cap clarifying questions at 1. If scope is unclear after one question, flag it and propose breaking the item down into smaller roadmap entries first.
-- Never mark an item complete in the roadmap until the Phase 5 fidelity check passes.
-- **No scope creep.** Adjacent improvements go on the roadmap as new items, not into this session.
-- **Ambiguity → narrow interpretation.** State it explicitly so the user can correct before work begins.
-- **Do not rewrite or reorder the roadmap doc** — only mark the completed item done.
+- Complete one parent per invocation.
+- Never start implementation before orientation, selection, and scoping.
+- Implement directly; generic roadmap continuation belongs here, while explicit surgical or chunked execution belongs to `inchstone`.
+- Never add routine chunk approval gates.
+- Never mark an item complete until fidelity, CI, and review succeed.
+- Preserve unrelated user changes and stop on unsafe overlap or uncertain attribution.
+- Keep scope narrow and do not rewrite or reorder the roadmap.

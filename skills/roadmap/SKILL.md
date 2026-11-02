@@ -1,7 +1,6 @@
 ---
 name: roadmap
-description: Use when you have a large feature, project, or initiative to plan. Breaks it into discrete, sequenced milestones and writes them to a ROADMAP.md that milestone can consume.
-argument-hint: "[topic or goal] (optional — describe what you're planning; skill will ask if not provided)"
+description: Break a large feature, project, or initiative into discrete, sequenced, single-session milestones and write them to ROADMAP.md. Use when the user asks to create or update an implementation roadmap.
 ---
 
 # Roadmap
@@ -20,13 +19,13 @@ Before asking anything, understand the current state:
 
 1. Check whether a `ROADMAP.md` or `MILESTONES.md` already exists. If it does, read it — this may be an update session, not a fresh start.
 2. Run `git log --oneline -15` to see what has already shipped. Do not propose milestones for work that's already done.
-3. Read `CLAUDE.md` and `README.md` for project context, constraints, and conventions.
+3. Read `AGENTS.md`, `CLAUDE.md`, and `README.md` when present for project context, constraints, and conventions.
 
 ---
 
 ## Phase 2: Understand the goal
 
-If `$ARGUMENTS` describes the goal clearly, use it. Otherwise ask one question to establish:
+If the user's request describes the goal clearly, use it. Otherwise ask one question to establish:
 
 - What are we planning? (the feature, initiative, or project)
 - What does "done" look like at the end of the roadmap?
@@ -102,9 +101,9 @@ If all milestones are strictly sequential, IDs and dependency markers are option
 
 Use `- [ ]` for every planned item. Use `- [x]` only for items already completed. Do not use any other done-marker — `milestone` parses this format.
 
-After writing, confirm the file path and tell the user they can run `/bender:milestone` to start executing.
+After writing, confirm the file path and tell the user they can invoke `$milestone` to start executing.
 
-If no `bin/ci` script or CI command was found in `CLAUDE.md` during Phase 1, suggest the user add one. Example: "Consider adding your CI/test command to `CLAUDE.md` (e.g., `Run tests: npm test`) so milestone and pipeline can discover it automatically."
+If no `bin/ci` script or CI command was found in `AGENTS.md` or `CLAUDE.md` during Phase 1, suggest the user add one. Example: "Consider adding your CI/test command to `AGENTS.md` (e.g., `Run tests: npm test`) so milestone and pipeline can discover it automatically."
 
 ---
 

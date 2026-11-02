@@ -59,6 +59,6 @@ Each claim requires its own fresh verification run.
 
 When the claim involves overall project health ("tests pass", "everything works", "ready to commit"), verification must include the project's CI or full test suite — not just the tests you wrote or modified this session.
 
-Discover the CI command via: `bin/ci` → `CLAUDE.md` → auto-discover from project files (`package.json`, `Makefile`, `Cargo.toml`, etc.). If no CI command is found, run the broadest test command available.
+Discover the CI command via: `bin/ci` → `AGENTS.md` or `CLAUDE.md` → auto-discover from project files (`package.json`, `Makefile`, `Cargo.toml`, etc.). If no CI command is found, run the broadest test command available.
 
 Running a single test file that passes does not verify that other tests weren't broken.
